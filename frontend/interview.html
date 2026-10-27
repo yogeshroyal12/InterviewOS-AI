@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InterviewOS AI - Interview</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1f2937; }
+    textarea { width: 100%; min-height: 120px; font: inherit; padding: 0.5rem; }
+    button { padding: 0.6rem 1rem; margin: 0.25rem 0.25rem 0.25rem 0; font: inherit; cursor: pointer; }
+    #question { font-size: 1.2rem; margin: 1rem 0; }
+    #status { color: #6b7280; }
+  </style>
+</head>
+<body>
+  <h1>InterviewOS AI</h1>
+  <p id="status">Not started.</p>
+  <p id="question"></p>
+  <button id="speak">Read question aloud</button>
+  <button id="listen">Speak answer</button>
+  <textarea id="answer" placeholder="Type or speak your answer"></textarea>
+  <button id="submit">Submit answer</button>
+  <script src="js/interview.js"></script>
+</body>
+</html>
