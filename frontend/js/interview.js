@@ -26,9 +26,33 @@ async function startInterview(jobId, resumeId) {
   showQuestion(data.current_question);
 }
 
-function showQuestion(text) {
-  $("question").textContent = text || "Interview complete.";
-  $("status").textContent = text ? "Question ready. Click 'Read question aloud'." : "Finished.";
+function showQuestion(text, followUp = false) {
+  if (!text) {
+    $("question").textContent = "Interview complete.";
+    $("status").textContent = "Finished. Loading your report...";
+    loadReport();
+    return;
+  }
+  $("question").textContent = text;
+  $("status").textContent = followUp
+    ? "Follow-up: please expand on your answer."
+    : "Question ready. Click 'Read question aloud'.";
+}
+
+async function loadReport() {
+  const res = await fetch(`${API}/api/v1/interviews/${interviewId}/report`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    $("status").textContent = `Report failed (${res.status}).`;
+    return;
+  }
+  const r = await res.json();
+  const items = r.items
+    .map((i, n) => `<li><strong>Q${n + 1}</strong> score ${i.overall}/5<br>${i.evidence.join("<br>")}</li>`)
+    .join("");
+  $("status").innerHTML =
+    `<strong>Overall score: ${r.overall_score}</strong><p>${r.limitations}</p><ol>${items}</ol>`;
 }
 
 function speak(text) {
@@ -77,8 +101,7 @@ async function submitAnswer() {
   }
   $("answer").value = "";
   const data = await res.json();
-  showQuestion(data.current_question);
-}
+  showQuestion(data.current_question, data.follow_ups_used > 0);}
 
 $("speak").onclick = () => speak($("question").textContent);
 $("listen").onclick = listen;
