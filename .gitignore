@@ -30,3 +30,4 @@ backend/*.pdf
 backend/sample.txt
 backend/check_db.py
 
+backend/check_key.py
