@@ -13,6 +13,7 @@ class InterviewSession:
     current_index: int = 0
     follow_ups_used: int = 0
     answers: list[str] = field(default_factory=list)
+    evaluations: list[dict] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if not self.questions:

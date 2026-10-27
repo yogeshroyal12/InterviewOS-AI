@@ -29,6 +29,7 @@ def _load(record: InterviewRecord) -> InterviewSession:
     session.state = InterviewState(record.state)
     session.current_index = record.current_index
     session.answers = json.loads(record.answers_json)
+    session.evaluations = json.loads(record.evaluations_json)
     return session
 
 
@@ -36,6 +37,7 @@ def _save(db: Session, record: InterviewRecord, session: InterviewSession) -> No
     record.state = session.state.value
     record.current_index = session.current_index
     record.answers_json = json.dumps(session.answers)
+    record.evaluations_json = json.dumps(session.evaluations)
     db.commit()
 
 
@@ -88,8 +90,17 @@ def submit_answer(
     session = _load(record)
     question = session.current_question or ""
     session.submit_answer(payload.answer)
-    # Rule-based evaluation: the rubric decides whether a follow-up is needed.
     evaluation = evaluate_answer(question, payload.answer, [])
+    session.evaluations.append({
+        "question": question,
+        "answer": payload.answer,
+        "completeness": evaluation.completeness,
+        "relevance": evaluation.relevance,
+        "clarity": evaluation.clarity,
+        "overall": evaluation.overall,
+        "evidence": evaluation.evidence,
+        "rubric_version": evaluation.rubric_version,
+    })
     step = session.next_step(evaluation.needs_follow_up)
     if step != "completed":
         session.ask_next()
