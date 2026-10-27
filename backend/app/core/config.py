@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./interviewos.db"
     jwt_secret_key: str = "dev-only-change-me-please-32-chars-min"
     access_token_minutes: int = 60
+    groq_api_key: str = ""
+    groq_model: str = "openai/gpt-oss-120b"
 
 
 @lru_cache
