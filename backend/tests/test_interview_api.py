@@ -28,7 +28,14 @@ def client(monkeypatch):
             db.close()
 
     # Force the fallback question bank so tests never call Groq.
-    monkeypatch.setattr(interviews_module, "generate_questions", lambda jd, resume: ["Q1", "Q2"])
+    monkeypatch.setattr(
+        interviews_module,
+        "generate_questions",
+        lambda jd, resume: [
+            {"question": "Q1", "concepts": ["fastapi"]},
+            {"question": "Q2", "concepts": ["pytest"]},
+        ],
+    )    
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client

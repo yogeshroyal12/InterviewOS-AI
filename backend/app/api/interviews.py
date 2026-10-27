@@ -67,11 +67,18 @@ def start_interview(
 ) -> InterviewResponse:
     job = _owned_document(db, payload.job_document_id, current_user, "job_description")
     resume = _owned_document(db, payload.resume_document_id, current_user, "resume")
-    questions = generate_questions(job.extracted_text, resume.extracted_text)
+    items = generate_questions(job.extracted_text, resume.extracted_text)
+    questions = [item["question"] for item in items]
+    concepts = [item["concepts"] for item in items]
 
     session = InterviewSession(questions=questions)
     session.start()
-    record = InterviewRecord(user_id=current_user.id, state=session.state.value, questions_json=json.dumps(questions))
+    record = InterviewRecord(
+        user_id=current_user.id,
+        state=session.state.value,
+        questions_json=json.dumps(questions),
+        concepts_json=json.dumps(concepts),
+    )
     db.add(record)
     db.commit()
     db.refresh(record)
@@ -89,8 +96,9 @@ def submit_answer(
     record = _get_owned_record(db, interview_id, current_user)
     session = _load(record)
     question = session.current_question or ""
+    expected = json.loads(record.concepts_json)[session.current_index]
     session.submit_answer(payload.answer)
-    evaluation = evaluate_answer(question, payload.answer, [])
+    evaluation = evaluate_answer(question, payload.answer, expected)
     session.evaluations.append({
         "question": question,
         "answer": payload.answer,
