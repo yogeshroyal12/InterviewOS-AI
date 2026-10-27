@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
 from app.db.database import get_db
+from app.evaluation.rubric import evaluate_answer
 from app.interview.questions import generate_questions
 from app.interview.session import InterviewSession
 from app.interview.state import InterviewState
@@ -85,10 +86,11 @@ def submit_answer(
 ) -> InterviewResponse:
     record = _get_owned_record(db, interview_id, current_user)
     session = _load(record)
+    question = session.current_question or ""
     session.submit_answer(payload.answer)
-    # Simple rule for now: a short answer triggers one follow-up, otherwise move on.
-    needs_follow_up = len(payload.answer.split()) < 15
-    step = session.next_step(needs_follow_up)
+    # Rule-based evaluation: the rubric decides whether a follow-up is needed.
+    evaluation = evaluate_answer(question, payload.answer, [])
+    step = session.next_step(evaluation.needs_follow_up)
     if step != "completed":
         session.ask_next()
     _save(db, record, session)
