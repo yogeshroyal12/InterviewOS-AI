@@ -18,4 +18,5 @@ class InterviewRecord(Base):
     current_index: Mapped[int] = mapped_column(default=0)
     questions_json: Mapped[str] = mapped_column(default="[]")
     answers_json: Mapped[str] = mapped_column(default="[]")
+    evaluations_json: Mapped[str] = mapped_column(default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
